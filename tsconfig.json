@@ -1,0 +1,7 @@
+{
+    "compilerOptions": {
+        "watch": true,
+        "strict": true,
+        "esModuleInterop": true
+    }
+}

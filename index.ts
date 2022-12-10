@@ -29,7 +29,22 @@ app.get("/", (req, res) => {
     })
 })
 
-app.post("/")
+app.post("/", (req, res) => {
+    fs.readFile(filePath, encoding, (err, data) => {
+        if (err) res.send(err)
+        else {
+            const bookArr = JSON.parse(data), newBook: { id: number, title: string } = req.body
+            let newArr: Array<{ id: number, title: string }> = []
+            newArr = newArr.concat(bookArr, newBook)
+            const insertData = JSON.stringify(newArr)
+
+            fs.writeFile(filePath, insertData, (err) => {
+                if (err) res.send(err)
+                else res.status(201).send("The book was added.")
+            })
+        }
+    })
+})
 
 app.put("/")
 

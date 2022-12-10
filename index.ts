@@ -33,7 +33,9 @@ app.post("/", (req, res) => {
     fs.readFile(filePath, encoding, (err, data) => {
         if (err) res.send(err)
         else {
-            const bookArr = JSON.parse(data), newBook: { id: number, title: string } = req.body
+            const bookArr = JSON.parse(data)
+            let newBook = req.body
+            newBook.id = parseInt(newBook.id)
             let newArr: Array<{ id: number, title: string }> = []
             newArr = newArr.concat(bookArr, newBook)
             const insertData = JSON.stringify(newArr)
@@ -46,6 +48,27 @@ app.post("/", (req, res) => {
     })
 })
 
-app.put("/")
+app.put("/", (req, res) => {
+    fs.readFile(filePath, encoding, (err, data) => {
+        if (err) res.send(err)
+        else {
+            const updatedBook: {id: string, title: string} = req.body
+            let bookArr: Array<{id: number, title: string}> = JSON.parse(data)
+            
+            for (let value of bookArr) {
+                if (parseInt(updatedBook.id) === value.id) {
+                    value.id = parseInt(updatedBook.id)
+                    value.title = updatedBook.title
+                }
+            }
+
+            let insertData = JSON.stringify(bookArr)
+            fs.writeFile(filePath, insertData, encoding, (err) => {
+                if (err) res.send(err)
+                else res.send("Book updated.")
+            })
+        }
+    })
+})
 
 app.delete("/")

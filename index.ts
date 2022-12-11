@@ -52,9 +52,9 @@ app.put("/", (req, res) => {
     fs.readFile(filePath, encoding, (err, data) => {
         if (err) res.send(err)
         else {
-            const updatedBook: {id: string, title: string} = req.body
-            let bookArr: Array<{id: number, title: string}> = JSON.parse(data)
-            
+            const updatedBook: { id: string, title: string } = req.body
+            let bookArr: Array<{ id: number, title: string }> = JSON.parse(data)
+
             for (let value of bookArr) {
                 if (parseInt(updatedBook.id) === value.id) {
                     value.id = parseInt(updatedBook.id)
@@ -71,4 +71,23 @@ app.put("/", (req, res) => {
     })
 })
 
-app.delete("/")
+app.delete("/", (req, res) => {
+    fs.readFile(filePath, encoding, (err, data) => {
+        if (err) res.send(err)
+        else {
+            let bookArr: Array<{ id: number, title: string }> = JSON.parse(data)
+            let deletedBook: {id: any, title: string} = req.body
+            deletedBook.id = parseInt(deletedBook.id)
+
+            for(let i = 0; i < bookArr.length; i++){
+                if(bookArr[i].id === deletedBook.id) bookArr.splice(i, 1)
+            }
+
+            const insertData = JSON.stringify(bookArr)
+            fs.writeFile(filePath, insertData, encoding, (err) => {
+                if(err) res.send(err)
+                else res.send("The book was deleted.")
+            })
+        }
+    })
+})

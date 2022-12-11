@@ -11,37 +11,37 @@ app.use(express.urlencoded({ extended: true }))
 
 app.get("/", (req, res) => {
     fs.readFile(filePath, encoding, (err, data) => {
-        if (err) res.send(err)
+        if (err) res.status(500).send(err)
         else {
-            let bookArr = [], found = [], getResponse: string
-            bookArr = JSON.parse(data)
+            let bookList: Array<{ id: number, title: string }>, foundBook: Array<{ id: number, title: string }>, getResponse: string
+            bookList = JSON.parse(data), foundBook = []
 
-            for (let value of bookArr) {
+            for (let value of bookList) {
                 if (value['id'] == req.body['id'] || value['title'] == req.body['title']) {
-                    found.push(value)
+                    foundBook.push(value)
                 }
             }
 
-            getResponse = JSON.stringify(found)
-            if (found.length > 0) res.status(200).send(getResponse)
-            else res.status(400).send("Book not found!")
+            getResponse = JSON.stringify(foundBook)
+            if (foundBook.length > 0) res.status(200).send(getResponse)
+            else res.status(404).send("Book not found!")
         }
     })
 })
 
 app.post("/", (req, res) => {
     fs.readFile(filePath, encoding, (err, data) => {
-        if (err) res.send(err)
+        if (err) res.status(500).send(err)
         else {
-            const bookArr = JSON.parse(data)
-            let newBook = req.body
-            newBook.id = parseInt(newBook.id)
-            let newArr: Array<{ id: number, title: string }> = []
-            newArr = newArr.concat(bookArr, newBook)
-            const insertData = JSON.stringify(newArr)
+            let bookList: Array<{ id: number, title: string }> = JSON.parse(data)
+            let newBook: { id: any, title: string } = req.body, booksJSON: string
 
-            fs.writeFile(filePath, insertData, (err) => {
-                if (err) res.send(err)
+            newBook.id = parseInt(newBook.id)
+            bookList = bookList.concat(newBook)
+            booksJSON = JSON.stringify(bookList)
+
+            fs.writeFile(filePath, booksJSON, encoding, (err) => {
+                if (err) res.status(500).send(err)
                 else res.status(201).send("The book was added.")
             })
         }
@@ -50,22 +50,22 @@ app.post("/", (req, res) => {
 
 app.put("/", (req, res) => {
     fs.readFile(filePath, encoding, (err, data) => {
-        if (err) res.send(err)
+        if (err) res.status(500).send(err)
         else {
             const updatedBook: { id: string, title: string } = req.body
-            let bookArr: Array<{ id: number, title: string }> = JSON.parse(data)
+            let bookList: Array<{ id: number, title: string }> = JSON.parse(data)
 
-            for (let value of bookArr) {
+            for (let value of bookList) {
                 if (parseInt(updatedBook.id) === value.id) {
                     value.id = parseInt(updatedBook.id)
                     value.title = updatedBook.title
                 }
             }
 
-            let insertData = JSON.stringify(bookArr)
-            fs.writeFile(filePath, insertData, encoding, (err) => {
-                if (err) res.send(err)
-                else res.send("Book updated.")
+            let booksJSON = JSON.stringify(bookList)
+            fs.writeFile(filePath, booksJSON, encoding, (err) => {
+                if (err) res.status(500).send(err)
+                else res.status(200).send("Book updated.")
             })
         }
     })
@@ -73,20 +73,21 @@ app.put("/", (req, res) => {
 
 app.delete("/", (req, res) => {
     fs.readFile(filePath, encoding, (err, data) => {
-        if (err) res.send(err)
+        if (err) res.status(500).send(err)
         else {
-            let bookArr: Array<{ id: number, title: string }> = JSON.parse(data)
-            let deletedBook: {id: any, title: string} = req.body
+            let booksJSON: string
+            let bookList: Array<{ id: number, title: string }> = JSON.parse(data)
+            let deletedBook: { id: any, title: string } = req.body
             deletedBook.id = parseInt(deletedBook.id)
 
-            for(let i = 0; i < bookArr.length; i++){
-                if(bookArr[i].id === deletedBook.id) bookArr.splice(i, 1)
+            for (let i = 0; i < bookList.length; i++) {
+                if (bookList[i].id === deletedBook.id) bookList.splice(i, 1)
             }
 
-            const insertData = JSON.stringify(bookArr)
-            fs.writeFile(filePath, insertData, encoding, (err) => {
-                if(err) res.send(err)
-                else res.send("The book was deleted.")
+            booksJSON = JSON.stringify(bookList)
+            fs.writeFile(filePath, booksJSON, encoding, (err) => {
+                if (err) res.status(500).send(err)
+                else res.status(200).send("The book was deleted.")
             })
         }
     })
